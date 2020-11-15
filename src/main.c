@@ -1,4 +1,4 @@
-#include "HMD5.h"
+#include "md5.h"
 
 int main()
 {

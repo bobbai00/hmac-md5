@@ -25,7 +25,7 @@ typedef struct IV
 } IV;
 
 // 将一个word(4个字节)转换成一个4个字节的无符号整数
-num_t convertOctetToNumber(int o1, int o2, int o3, int o4);
+num_t convertOctetToNumber(unsigned int o1, unsigned int o2, unsigned int o3, unsigned int o4);
 
 num_t *convertMsgToNumbers(unsigned char *msg);
 

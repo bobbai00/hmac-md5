@@ -274,7 +274,7 @@ IV md5(char msg[])
 }
 
 // size 为input长度
-IV md5_hmac_version(unsigned char input, long long size)
+IV md5_hmac_version(unsigned char* input, long long size)
 {
   int group_idx = 0;
   IV iv = GetIV0();
