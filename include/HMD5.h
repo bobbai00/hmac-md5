@@ -36,6 +36,8 @@ IV Round(IV input, num_t idx, num_t xk[16], CV message, num_t s[16], num_t t[16]
 
 IV md5(char msg[]);
 
+IV addIV(IV a, IV b);
+
 num_t XK[4][16] = {
     {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15},
     {1, 6, 11, 0, 5, 10, 15, 4, 9, 14, 3, 8, 13, 2, 7, 12},

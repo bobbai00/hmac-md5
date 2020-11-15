@@ -85,15 +85,25 @@ IV GetIV0()
   return iv;
 };
 
+IV addIV(IV a, IV b)
+{
+  IV ret;
+  ret.A = a.A + b.A;
+  ret.B = a.B + b.B;
+  ret.C = a.C + b.C;
+  ret.D = a.D + b.D;
+  return ret;
+}
+
 IV md5(char msg[])
 {
   int group_idx = 0;
-  long long group_num = 0;
   IV iv = GetIV0();
+  IV last_iv = GetIV0();
   while (1)
   {
     int base = group_idx * 64;
-    int i = 0; // 当前分组的长度
+    int i = 0; // 当前分组的字节数
     while (msg[i + base] != '\0' && i < 64)
     {
       i++;
@@ -102,42 +112,57 @@ IV md5(char msg[])
     if (i == 64)
     {
       // 说明不需要填充，当前分组的长度就为512bit
-      char subMsg[64];
+      unsigned char subMsg[64];
+
+      for (int i = 0; i < 64; i++)
+      {
+        subMsg[i] = 0;
+      }
       memcpy(subMsg, &msg[base], 64);
-      num_t *m = convertMsgToNumbers(subMsg, 64);
+      num_t *m = convertMsgToNumbers(subMsg);
       CV cv;
       cv.msg = m;
       iv = Hmd5(cv, iv);
+      iv = addIV(iv, last_iv);
+      last_iv = iv;
       group_idx++;
     }
     else
     {
       // 说明此时需要填充，填充 10000..., 长度使得该长度 % 512 = 448(%64 = 56)
-      unsigned long long bit_number = i * 8 + base * 8;
-      unsigned long long output = mod64(bit_number);
-      num_t *klen = produce8bytes(output);
+      // 位数
+      num_t bit_number = i * 8 + base * 8;
+      num_t *klen = produceLastTwoWord(bit_number);
 
+      // 说明这个分组长度小于448bit，需要首先填充1000到448 bit，再添加表示长度的字
       if (i < 56)
       {
+        // 64字节
+        unsigned char subMsg[64];
+        for (int i = 0; i < 64; i++)
+        {
+          subMsg[i] = 0;
+        }
 
-        char subMsg[64];
+        // 取出组
         memcpy(subMsg, &msg[base], i);
-        num_t *m = convertMsgToNumbers(subMsg, i);
-        // 填充1
-        m[i] = 0x1000000;
+
+        // 首先填充一个10000000
+        subMsg[i] = 0b10000000;
+
         i++;
         // 填充0
-        for (int j = 0; j < 56 - i - 1; j++)
+        int num_to_pad = 56 - i;
+        for (int j = 0; j < num_to_pad; j++)
         {
-          m[i] = 0;
+          subMsg[i] = 0;
           i++;
         }
-        // 填充64位的长度
-        while (i < 64)
-        {
-          m[i] = klen[i - 56];
-          i++;
-        }
+
+        // 转换成16个字
+        num_t *m = convertMsgToNumbers(subMsg);
+        m[14] = klen[0];
+        m[15] = klen[1];
 
         // 填充完成
         CV cv;
@@ -146,36 +171,40 @@ IV md5(char msg[])
       }
       else
       {
-        // 首先要把当前的分组填满，然后要创建一个新分组，填入56个字节的0和最终长度
-
+        // 首先要把当前的分组填充到64个字节，然后要创建一个新分组，填入56个字节的0和最终长度
         // 填满当前分组
-        char subMsg[64];
+        unsigned char subMsg[64];
+        for (int i = 0; i < 64; i++)
+        {
+          subMsg[i] = 0;
+        }
         memcpy(subMsg, &msg[base], i);
-        num_t *m = convertMsgToNumbers(subMsg, i);
-        char subMsg1[64];
-        memcpy(subMsg, &msg[base], i);
-        num_t *m = convertMsgToNumbers(subMsg, i);
+
         // 填充1
-        m[i] = 0x1000000;
+        subMsg[i] = 0b10000000;
         i++;
         // 填充0
-        for (int j = 0; j < 64 - i - 1; j++)
+        int num_to_pad = 64 - i;
+        for (int j = 0; j < num_to_pad; j++)
         {
-          m[i] = 0;
+          subMsg[i] = 0;
           i++;
         }
+        num_t *m = convertMsgToNumbers(subMsg);
         CV cv;
         cv.msg = m;
         iv = Hmd5(cv, iv);
 
+        iv = addIV(iv, last_iv);
+        last_iv = iv;
         // 创建新的分组
-        num_t m2[64];
-        for (int j = 0; j < 64; j++)
+        num_t m2[16];
+        for (int j = 0; j < 16; j++)
         {
           m2[j] = 0;
-          if (j >= 56)
+          if (j >= 14)
           {
-            m2[j] = klen[j - 56];
+            m2[j] = klen[j - 14];
           }
         }
         cv.msg = m2;
@@ -184,5 +213,6 @@ IV md5(char msg[])
       break;
     }
   }
-  return iv;
+  IV ret = addIV(iv, last_iv);
+  return ret;
 }
