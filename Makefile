@@ -8,7 +8,7 @@ TEST_DIR := test
 INCLUDE := -I./$(INC_DIR)
 
 
-$(BIN_DIR)/main: $(BUILD_DIR)/main.o $(BUILD_DIR)/HMD5.o
+$(BIN_DIR)/main: $(BUILD_DIR)/main.o $(BUILD_DIR)/hmac.o $(BUILD_DIR)/md5.o
 	@mkdir -p $(BIN_DIR)
 	$(CC) $(FLAGS) $(INCLUDE) $(LIB) $^ -o $@
 	./bin/main
