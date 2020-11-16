@@ -32,6 +32,7 @@ unsigned char *padKey(unsigned char *key, int key_size, int B)
     new_key = md5_hmac_version(key, key_size);
     key_size = 16;
   }
+  // 添加0进行padding
   for (int i = 0; i < B; i++)
   {
     ret[i] = 0;
@@ -43,7 +44,7 @@ unsigned char *padKey(unsigned char *key, int key_size, int B)
   return ret;
 };
 
-// 逐个异或
+// 逐位异或
 unsigned char *XOR(unsigned char *key, unsigned char *val, int size)
 {
   unsigned char *ret = (unsigned char *)malloc(sizeof(unsigned char) * size);
@@ -55,8 +56,9 @@ unsigned char *XOR(unsigned char *key, unsigned char *val, int size)
 }
 
 // key为用户定义的密钥；B为长度，一般定为64；msg 为输入的消息；output为输出的数组
-void HMAC(unsigned char *key, int B, unsigned char *msg, unsigned char *output, int *size)
+unsigned char *HMAC(unsigned char *key, int B, unsigned char *msg)
 {
+
   int key_size = 0;
   while (key[key_size] != '\0')
   {
@@ -67,10 +69,10 @@ void HMAC(unsigned char *key, int B, unsigned char *msg, unsigned char *output, 
   {
     msg_size++;
   }
-  unsigned char *pad_key = padKey(key, key_size, B);
-  unsigned char *h1 = (unsigned char *)malloc((msg_size + B) * sizeof(char));
-  unsigned char *key1 = XOR(pad_key, ipad(B), B);
 
+  unsigned char *pad_key = padKey(key, key_size, B);
+  unsigned char *h1 = (unsigned char *)malloc((msg_size + B) * sizeof(unsigned char));
+  unsigned char *key1 = XOR(pad_key, ipad(B), B);
   // 拼接key和msg，大小为msg_size + B
   for (int i = 0; i < msg_size + B; i++)
   {
@@ -86,7 +88,7 @@ void HMAC(unsigned char *key, int B, unsigned char *msg, unsigned char *output, 
   }
 
   unsigned char *out1 = md5_hmac_version(h1, B + msg_size);
-  unsigned char *h2 = (unsigned char *)malloc((16 + B) * sizeof(char));
+  unsigned char *h2 = (unsigned char *)malloc((16 + B) * sizeof(unsigned char));
   unsigned char *key2 = XOR(pad_key, opad(B), B);
 
   for (int i = 0; i < 16 + B; i++)
@@ -94,14 +96,13 @@ void HMAC(unsigned char *key, int B, unsigned char *msg, unsigned char *output, 
     h2[i] = 0;
     if (i < B)
     {
-      h2[i] = key1[i];
+      h2[i] = key2[i];
     }
     else
     {
-      h2[i] = msg[i - B];
+      h2[i] = out1[i - B];
     }
   }
 
-  output = md5_hmac_version(h2, B + 16);
-  *size = B + 16;
+  return md5_hmac_version(h2, B + 16);
 };

@@ -76,6 +76,7 @@ num_t rotate_left(const num_t value, int shift)
 IV Round(IV input, num_t idx, num_t xk[16], CV message, num_t s[16], num_t t[16])
 {
   num_t (*g)(num_t, num_t, num_t);
+  // 根据该轮的索引选择轮函数
   if (idx == 0)
   {
     g = &F;
@@ -93,6 +94,7 @@ IV Round(IV input, num_t idx, num_t xk[16], CV message, num_t s[16], num_t t[16]
     g = &I;
   }
 
+  // 每轮有16次迭代
   for (int i = 0; i < 16; i++)
   {
     num_t g_out = g(input.B, input.C, input.D);
@@ -114,6 +116,7 @@ IV Round(IV input, num_t idx, num_t xk[16], CV message, num_t s[16], num_t t[16]
 
 IV Hmd5(CV msg, IV iv)
 {
+  // 这里直接调用4轮，将结果输出即可
   for (int i = 0; i < 4; i++)
   {
     iv = Round(iv, i, XK[i], msg, S[i], T[i]);
@@ -302,8 +305,7 @@ unsigned char *md5(char *msg)
   return res;
 }
 
-// size 为input长度
-unsigned char *md5_hmac_version(unsigned char *input, long long size)
+unsigned char *md5_hmac_version(unsigned char *msg, long long size)
 {
   int group_idx = 0;
   IV iv = GetIV0();
@@ -312,10 +314,11 @@ unsigned char *md5_hmac_version(unsigned char *input, long long size)
   {
     int base = group_idx * 64;
     int i = 0; // 当前分组的字节数
-    while (i < 64 && i + base < size)
+    while (i + base < size && i < 64)
     {
       i++;
     }
+
     if (i == 64)
     {
       // 说明不需要填充，当前分组的长度就为512bit
@@ -325,7 +328,7 @@ unsigned char *md5_hmac_version(unsigned char *input, long long size)
       {
         subMsg[i] = 0;
       }
-      copySubArray(subMsg, input, base, 64);
+      memcpy(subMsg, &msg[base], 64);
       num_t *m = convertMsgToNumbers(subMsg);
       CV cv;
       cv.msg = m;
@@ -352,7 +355,7 @@ unsigned char *md5_hmac_version(unsigned char *input, long long size)
         }
 
         // 取出组
-        copySubArray(subMsg, input, base, i);
+        memcpy(subMsg, &msg[base], i);
 
         // 首先填充一个10000000
         subMsg[i] = 0b10000000;
@@ -385,7 +388,7 @@ unsigned char *md5_hmac_version(unsigned char *input, long long size)
         {
           subMsg[i] = 0;
         }
-        copySubArray(subMsg, input, base, i);
+        memcpy(subMsg, &msg[base], i);
 
         // 填充1
         subMsg[i] = 0b10000000;
@@ -424,40 +427,6 @@ unsigned char *md5_hmac_version(unsigned char *input, long long size)
   unsigned char *res = decode(ret);
   return res;
 }
-
-void convertIVToString(IV src, unsigned char *dst)
-{
-  int idx = 0;
-  char temp[9];
-  src.A = htonl(src.A);
-
-  sprintf(temp, "%x", src.A);
-  for (int i = 0; i < 8; i++)
-  {
-    dst[idx++] = temp[i];
-  }
-  src.B = htonl(src.B);
-
-  sprintf(temp, "%x", src.B);
-  for (int i = 0; i < 8; i++)
-  {
-    dst[idx++] = temp[i];
-  }
-  src.C = htonl(src.C);
-
-  sprintf(temp, "%x", src.C);
-  for (int i = 0; i < 8; i++)
-  {
-    dst[idx++] = temp[i];
-  }
-  src.D = htonl(src.D);
-
-  sprintf(temp, "%x", src.D);
-  for (int i = 0; i < 8; i++)
-  {
-    dst[idx++] = temp[i];
-  }
-};
 
 void print(unsigned char *res)
 {
