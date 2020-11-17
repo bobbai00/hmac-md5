@@ -610,24 +610,50 @@ unsigned char *h2 = (unsigned char *)malloc((16 + B) * sizeof(unsigned char));
 
 关于验证样例，我参考了 [rfc2104](https://tools.ietf.org/html/rfc2104), 即HMAC的白皮书，以及[rfc1321](https://tools.ietf.org/html/rfc1321), 即MD5的白皮书中的样例，如下:
 
-- **HMAC的三组样例**
+- **HMAC的4组样例**
+
+rfc2104 中的测例：
 
 ![](https://tva1.sinaimg.cn/large/0081Kckwgy1gkrg5m83d5j317i0egjti.jpg)
 
 <img src="https://tva1.sinaimg.cn/large/0081Kckwgy1gkrg6u8nknj314g09gq3t.jpg" style="zoom:65%;" />
 
+我的自定义测例:
+
+```
+key: adfhajhdfjhkadjshjghkdhsanvkdnklvnlckxnbnjknjfnlnjnlqjo1341324adfdaq312531;3;41
+
+message: adquewyrouyqoewytouqyweouirioiqywifgduaihfajsbkbadksbjkvbksabk2341028378051732809071302904891203890fhe89hwpfadsfasdffff124213516238947691234123,./1234132./,./,.,/;l';l';l';'l;
+
+digest: df56cd2653fdfbfd21aa50e40e9b4791
+```
+
+
+
 - 我的代码的HMAC测试结果
 
 输入: `make test`, 结果如下：
 
-<img src="https://tva1.sinaimg.cn/large/0081Kckwgy1gkrg8kfvo1j30qa0sijtt.jpg" style="zoom:50%;" />
+![](https://tva1.sinaimg.cn/large/0081Kckwgy1gks9t45lp9j31ui0u0n2f.jpg)
 
 
 
-- **MD5 的7组样例**
+- **MD5 的8组样例**
+
+rfc1321 中的测例:
 
 ![](https://tva1.sinaimg.cn/large/0081Kckwgy1gkrg9vszmkj30xg080mzb.jpg)
 
+我自定义的测例:
+
+```
+输入: adfhjflahdljshfljhalsdkhlfjasdjlflqwjlehlrhjhqwoiueyr0123098576102857091870894061038r0c9dosaihfishfhoiuhsdoihfpaihesdlkfnlkdsv
+
+digest: 15ef8e5b367af7b035fe47892b573f1a
+```
+
+
+
 - 我的MD5的测试结果
 
-<img src="https://tva1.sinaimg.cn/large/0081Kckwgy1gkrganazr0j310b0u0tee.jpg" style="zoom:50%;" />
+![](https://tva1.sinaimg.cn/large/0081Kckwgy1gks9m9dut9j319k0u0wly.jpg)

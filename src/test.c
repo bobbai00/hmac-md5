@@ -2,9 +2,9 @@
 
 void MD5_testcase()
 {
-  char *messages[] = {"", "a", "abc", "message digest", "abcdefghijklmnopqrstuvwxyz", "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789", "12345678901234567890123456789012345678901234567890123456789012345678901234567890"};
-  char *expectation[] = {"d41d8cd98f00b204e9800998ecf8427e", "0cc175b9c0f1b6a831c399e269772661", "900150983cd24fb0d6963f7d28e17f72", "f96b697d7cb7938d525a2f31aaf161d0", "c3fcd3d76192e4007dfb496cca67e13b", "d174ab98d277d9f5a5611c2c9f419d9f", "57edf4a22be3c955ac49da2e2107b67a"};
-  for (int i = 0; i < 7; i++)
+  char *messages[] = {"", "a", "abc", "message digest", "abcdefghijklmnopqrstuvwxyz", "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789", "12345678901234567890123456789012345678901234567890123456789012345678901234567890", "adfhjflahdljshfljhalsdkhlfjasdjlflqwjlehlrhjhqwoiueyr0123098576102857091870894061038r0c9dosaihfishfhoiuhsdoihfpaihesdlkfnlkdsv"};
+  char *expectation[] = {"d41d8cd98f00b204e9800998ecf8427e", "0cc175b9c0f1b6a831c399e269772661", "900150983cd24fb0d6963f7d28e17f72", "f96b697d7cb7938d525a2f31aaf161d0", "c3fcd3d76192e4007dfb496cca67e13b", "d174ab98d277d9f5a5611c2c9f419d9f", "57edf4a22be3c955ac49da2e2107b67a", "15ef8e5b367af7b035fe47892b573f1a"};
+  for (int i = 0; i < 8; i++)
   {
     printf("---------- MD5 TESTCASE %d ---------\n", i + 1);
     printf("Input message: %s\n", messages[i]);
@@ -19,8 +19,10 @@ void HMAC_testcase()
 {
   unsigned char m1[] = "Hi There";
   unsigned char m2[] = "what do ya want for nothing?";
-  unsigned char *msgs[3];
-  unsigned char *keys[3];
+  unsigned char m3[] = "adquewyrouyqoewytouqyweouirioiqywifgduaihfajsbkbadksbjkvbksabk2341028378051732809071302904891203890fhe89hwpfadsfasdffff124213516238947691234123,./1234132./,./,.,/;l';l';l';'l;";
+  unsigned char key4[] = "adfhajhdfjhkadjshjghkdhsanvkdnklvnlckxnbnjknjfnlnjnlqjo1341324adfdaq312531;3;41";
+  unsigned char *msgs[4];
+  unsigned char *keys[4];
   unsigned char key1[17], key2[17];
   unsigned char msg3[51];
   for (int i = 0; i < 50; i++)
@@ -31,6 +33,7 @@ void HMAC_testcase()
   msgs[0] = m1;
   msgs[1] = m2;
   msgs[2] = msg3;
+  msgs[3] = m3;
   for (int i = 0; i < 16; i++)
   {
     key1[i] = 0x0b;
@@ -46,9 +49,10 @@ void HMAC_testcase()
   keys[1][3] = 'e';
   keys[1][4] = '\0';
   keys[2] = key2;
+  keys[3] = key4;
 
-  char *expectation[] = {"9294727a3638bb1c13f48ef8158bfc9d", "750c783e6ab0b503eaa86e310a5db738", "56be34521d144c88dbb8c733f0e8b3f6"};
-  for (int i = 0; i < 3; i++)
+  char *expectation[] = {"9294727a3638bb1c13f48ef8158bfc9d", "750c783e6ab0b503eaa86e310a5db738", "56be34521d144c88dbb8c733f0e8b3f6", "df56cd2653fdfbfd21aa50e40e9b4791"};
+  for (int i = 0; i < 4; i++)
   {
     printf("---------- HMAC TESTCASE %d ---------\n", i + 1);
     printf("Input message: %s\n", msgs[i]);
